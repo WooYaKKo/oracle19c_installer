@@ -1,0 +1,205 @@
+#!/bin/sh
+
+# This script is Library of basic Functions
+#                written by Hooni in 2020.06.02
+
+#-- function List
+# consoleLog ()
+# doingLog ()
+# checkDir ()      # ARG = Directory Name
+# checkFile ()     # ARG = File Name
+# checkReadFile () # ARG = File Name
+# checkLog ()
+# checkOS ()
+# backupFile ()    # ARG = File Name
+# copytScript ()   # ARG = 1.Source File, 2.Target File
+# historyMenu ()   # ARG = Count;Messages or Messages
+
+_OS=$(uname -s)
+
+CurDir=$(cd $(dirname $0); pwd)
+[ ${_FuncDir} ] && CurDir=${_FuncDir}
+
+. ${CurDir}/basicVar.lib
+
+if [ ${_OS} = "Linux" ]; then
+    alias echo="echo -e"
+    alias print="echo -e"
+fi
+
+#--- message to LOG file and console
+consoleLog () {
+    echo "$*" | tee -a ${_LogFile}
+}
+
+#--- echo command to log and executable
+doingLog () {
+    echo "\n# CMD: "$*"" | tee -a ${_LogFile}
+    $* | tee -a ${_LogFile}
+    if [ $? -ne 0 ]; then
+        return -1
+    else
+        return 0
+    fi
+}
+
+#--- Directory Writeable Check
+checkDir () {
+# $1: Direcoty Name
+
+    [ ! -d $1 ] &&
+        mkdir -p $1 &&
+        consoleLog " * [ $1 ] Directory was successfully created.\n"
+
+    if [ ! -w ${1} ]; then
+        echo " * [ $1 ] directory is not writeable."
+        echo " * Please specify a writeable Directory using the Directory environment variable.\n"
+        exit
+    fi
+}
+
+#--- File Readable Check
+checkReadFile () {
+# $1: File Name (include Directory)
+
+    checkDir $(dirname $1)
+    if [ -e $1 ]; then
+        if [ ! -r $1 ]; then
+            echo " * [ $1 ] file is not readable."
+            echo " * Please specify a readable File using the File environment variable.\n"
+            exit
+        fi
+    else
+        echo " * [ $1 ] file dose not exist.\n"
+    fi
+}
+
+#--- File Writeable Check
+checkFile () {
+# $1: File Name (include Directory)
+
+    checkDir $(dirname $1)
+    if [ -e $1 ]; then
+        if [ ! -w $1 ]; then
+            echo " * [ $1 ] file is not writeable."
+            echo " * Please specify a writeable file using the File environment variable.\n"
+            exit
+        fi
+    else
+        echo " * [ ${1} ] file dose not exist."
+    fi
+}
+
+#--- Log Writeable Check
+checkLog () {
+# $1: Log file (Option)
+
+    [ $1 ] && _LogFile=$1
+    checkDir $(dirname ${_LogFile})
+
+    if [ -e ${_LogFile} ]; then
+        if [ ! -w ${_LogFile} ]; then
+            echo "Log file ${_LogFile} is not writeable."
+            echo "Please specify a writeable file using the LOG environment variable.\n"
+            exit
+        fi
+    else
+        if [ ! -w $(dirname ${_LogFile}) ]; then
+            echo "Log file ${_LogFile} is not writeable."
+            echo "Please specify a writeable file using the LOG environment variable.\n"
+            exit
+        fi
+    fi
+}
+
+#--- OS Check
+checkOS () {
+
+    if [ $1 ] ; then
+        OS=$1 
+        [ ${OS} != ${_OS} ] && echo "\n * [ ${_OS} ] is not supported yet.\n" && exit 1
+    fi
+
+    case ${_OS} in
+        AIX|Linux)
+            ;;
+        *)
+            echo " * Unknown OS <${_OS}> ... (AIX,Linux Only)"
+            exit 1
+            ;;
+    esac
+}
+
+fn_datetime () {
+    date +'%Y-%m-%d(%a) %H:%M:%S'
+}
+
+#--- File Backup Set COPY
+backupFile () {
+# $1: File Name
+
+    if [ ! -e $1 ]; then
+        echo " * [ $1 ] File does not exist..\n"
+        return
+    fi
+
+    consoleLog " --------------------------------------------------------------"
+    consoleLog " - [ $(basename $1) ] File Backup Set  ( $(f_datetime) )"
+
+    if [ $(ls -rtl $1.* 2>/dev/null |wc -l) -eq 0 ]; then
+        cp -rp $1 $1.${_LogTime} &&
+            consoleLog "   * [ $1 ] File was successfully backed up."
+    else
+        cmp -s $1 $(ls -rtl $1.* | tail -1|awk '{print $NF}') &&
+            consoleLog " [ $(basename $0) ] doesn't need to back up. It's already backed up." || 
+        {   checkReadFile $1
+            cp -rp $1 $1.${_LogTime} &&
+                consoleLog "   * [ $1 ] File was successfully backed up." || {
+                    consoleLog "   * [ $1 ] File was Failed to back up."
+                    exit
+                }
+        }
+    fi 
+    consoleLog " --------------------------------------------------------------"
+}
+
+#--- Scirpt Copy
+copyScript () {
+# $1: Source File
+# $2: Target File
+
+    [ -e $2 ] && cmp -s $1 $2 ||
+    {
+        [ -e $2 ] && backupFile $2
+
+        cp -rp $1 $(dirname $2)/
+        consoleLog " * [ $(basename $1) ] File was successfully copied.\n"
+    }
+}
+
+#--- Menu Log History
+historyMenu () {
+
+    if (( $(echo $*|grep -c ";" ) == 1 )); then
+        MenuList=$(echo $*|awk -F";" '{printf "%2d",$1}')
+        MenuList=$MenuList$(echo "$*"|awk -F";" '{print " ->",$2}')
+    else
+        MenuList="   -> $*"
+    fi
+
+    echo "$(date +'%Y.%m.%d %H:%M:%S')| $MenuList" >> ${_MenuLog}
+}
+
+#-- 
+fn_beginMessage () {
+    consoleLog "==================================================================================="
+    echo $* |awk '{printf "%-53s ",$0}' |tee -a ${_LogFile}
+    consoleLog "( $(f_datetime) )\n"
+
+}
+
+fn_endMessage () {
+    echo $* |awk '{printf "\n# END   %-45s ",$0}' |tee -a ${_LogFile}
+    consoleLog "( $(f_datetime) )"
+    consoleLog "===================================================================================\n"
+}

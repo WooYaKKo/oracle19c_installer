@@ -1,0 +1,99 @@
+#!/bin/sh
+
+# This Script is Library to get Information about Oracle
+#                written by Hooni in 2020.07.01
+
+_OS=$(uname -s)
+[ ${_OS} == "Linux" ] && alias echo="echo -e"
+[ ${_OS} == "AIX" ] && _Profile=.profile || _Profile=.bash_profile
+
+getOraUser () {
+# $1: ORACLE_SID
+
+    User=$(ps -ef|grep -v grep|grep ora_pmon_${1}|awk '{print $1}')
+    [ $User == "oracle" ] &&
+        User=$(echo ${SID%DB}|tr 'A-Z' 'a-z'|awk -F"tour" '{print $NF"ora"}')
+    [ $User == "prodora" ] && User=prdora
+    [ $(echo "nemsora imkora"| grep -c $User) -eq 1 ] && User=oracle
+    
+    echo $User
+}
+
+getOraDir () {
+# $1: OracleUser
+    echo $(grep $1 /etc/passwd | awk -F: '{print $6}')
+}
+
+getOraHome () {
+# $1: OracleUser
+    echo $(su - $1 -c "echo \$ORACLE_HOME"|tail -1)
+}
+
+getOraFS () {
+# $1: OracleUser
+    echo $(echo $(getOraHome $1)|cut -d'/' -f1-2)
+}
+
+getDBN () {
+# $1: ORACLE_SID
+
+    DBN=$1
+    [ $(echo "COMDB COMTEST" |grep -c ${1}) -eq 1 ] && DBN=MALLDB
+    [ ${1} == "BIDB" ] && DBN=data/${1}
+
+    echo $DBN
+}
+
+getSqlPlus () {
+#$1: Oracle User
+    echo $(cat "$(getOraDir ${1})/${_Profile}"|grep ^alias|grep ss|awk -F= '{print $NF}'|tr -d \')
+}
+
+getDiagFS () {
+# $1: Oracle User
+    echo $(su - ${1} -c "$(getSqlPlus ${1}) << EOF
+        show parameter diagnostic_dest
+        exit
+EOF" | grep diagnostic| awk '{print $NF}')
+}
+
+getArchFS () {
+# $1: ORACLE_SID
+    echo /$(getDBN $1)_arch
+}
+
+getOraListen () {
+# $1: ORACLE_SID
+    echo $(ps -ef|grep -v grep|grep -i tnslsnr|grep -i _${1%DB}|rev|awk '{print $2}'|rev)
+}
+
+getOraPartition () {
+# $1: OracleUser
+    OraUser=$1
+    OraDir=$(getOraDir ${OraUser})
+    Shell=${OraDir}/query.sh
+    Profile=${OraDir}/${_Profile}
+
+    echo $(grep alias ${Profile}|grep -w ss|awk -F"'" '{print $2,"<<EOF"}') >${Shell}
+    echo "select banner from v\\\$version ;\nexit\nEOF">>${Shell}
+    chown $OraUser.dba ${Shell}
+    chmod 755 ${Shell}
+
+    [ $(su - $OraUser -c "${Shell}"|grep Database|grep -c Enterprise) -gt 0 ] &&
+        echo "Edition : Enterprise" || echo "Edition : Standard"
+
+    echo $(grep alias ${Profile}|grep -w ss|awk -F"'" '{print $2,"<<EOF"}') >${Shell}
+    echo "set linesize 130\ncol VALUE format a10" >>${Shell}
+    echo "select * from v\\\$option where parameter='Partitioning';\nexit\nEOF">>${Shell}
+
+    echo $(su - $OraUser -c "${Shell}"|grep ^Partitioning | awk '{print $1,":",$2}')
+
+    rm -f ${Shell}
+}
+
+__main__ () {
+    [ $(ps -ef | grep -v grep | grep -c ora_pmon_) -eq 0 ] && 
+        echo " * Oracle is not running." &&
+        exit
+}
+__main__

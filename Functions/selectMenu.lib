@@ -1,0 +1,189 @@
+#!/bin/bash
+
+# This Script is to print Menu 
+#                written  by Hooni in 2020.06.08
+#                version2 by hooni in 2022.03.25
+
+[ $(uname -s) = "AIX" ] || alias print="echo -e"
+
+OS_NAME=$(uname -s)
+[ ${OS_NAME} = "Linux" ] &&
+    if [ -f /etc/os-release ]; then
+        OS_NAME=$(cat /etc/os-release |grep ^NAME |awk -F= '{print $NF}' |tr -d \" |awk -F" Linux" '{print $1}')
+    else
+        OS_NAME=$(cat /etc/redhat-release |awk -F" release" '{print $1}')
+    fi
+
+fn_printLine () {
+    echo "======================================================================" |sed 's/=/'$1'/g'
+}
+
+fn_printTitle () {
+    printf  "%${1}s%s\n" " " "$2"
+}
+
+fn_printHeader () {
+    printf " %-45s %20s\n" "$1" "$2"
+}
+
+fn_printMenu () {
+    clear
+    printf "%70s\n" "Ver. 2.0"
+    fn_printLine "="
+    fn_printHeader "${A[0]}" "for ${OS_NAME}"
+    fn_printLine "-"
+    fn_printTitle $(( (68-${#A[1]}) / 2)) "${A[1]}"
+    fn_printLine "="
+    echo
+    i=2
+    while (( i < ${#A[@]} )); do
+        [ $i -eq $((${#A[@]}-1)) ] && echo
+        [ $(echo ${A[$i]} |awk '{print $1}') = "(" ] || echo
+        fn_printTitle 0 "${A[$i]}"
+        (( i += 1 ))
+    done
+    printf "\n\n"
+    fn_printLine "-"
+    fn_printHeader "Copyright(c) 2016-2022 INTERPARK System Team." "All right reserved."
+    fn_printLine "="
+}
+
+f_menu () {
+    unset A
+    case $1 in
+        0)
+            A[0]="(Home)"
+            A[1]="Main Menu"
+            A[2]="1. Intitial Configuration                          +"
+            A[3]="2. System Configration                             +"
+            A[4]="3. Software Installation                           +"
+            A[5]="4. System Management                               +"
+            A[6]="Q. QUIT"
+            ;;
+        1)
+            A[0]="(Home)< 1."
+            A[1]="1. Initial Configration"
+            A[2]="1. ${_OS} Basic Environment"
+            A[3]="2. ${_OS} Basic Security Setting"
+            A[4]="3. Installing & Configuring a TCPwrapper"
+            A[5]="4. Configuring Setup.sh (/sbin/setup.sh)"
+            A[6]="0. All of OS Basic Setting ( 1 - 3 )"
+            A[7]="Q. Return to the Previous (Main Menu)"
+            ;;
+        2)
+            A[0]="(Home)< 2."
+            A[1]="2. System Configration"
+            A[2]="1. ${_OS} Security vulnerability Setting"
+            A[3]="2. Intstalling EMS"
+            A[4]="3. Creating Monitoring Shell                       +"
+            A[5]="4. Registering Crontab"
+            A[6]="Q. Return to the Previous (Main Menu)"
+            ;;
+        2_3)
+            A[0]="(Home)< 2.< 3."
+            A[1]="2-3. Creating Monitoring Shell"
+            A[2]="1. monitor.sh Creation"
+            A[3]="2. nmon.sh Creation"
+            A[4]="3. errpt_monitor.sh Creation (AIX Only)"
+            A[5]="0. All Setting"
+            A[6]="Q. Return to the Previous (System Configration)"
+            ;;
+        3)
+            A[0]="(Home)< 3."
+            A[1]="3. Software Installation"
+            A[2]="1. Language                                        +"
+            A[3]="  ( C++, Python, filebeat )"
+            A[4]="2. Database                                        +"
+            A[5]="  ( Oracle, Mysql, MongoDB )"
+            A[6]="3. Application                                     +"
+            A[7]="   ( TSM, Powerpath, HACMP, storcli )"
+            A[8]="Q. Return to the Previous (Main Menu)"
+            ;;
+        3_1)
+            A[0]="(Home)< 3.< 1."
+            A[1]="3-1. Installation (Language)"
+            A[2]="1. xlC++ (AIX Only)"
+            A[3]="2. Python (2.7, 3.7, 3.8, 3.9)"
+            A[4]="3. Git 2.24 (AIX)"
+            A[5]="4. filebeat 7.5 (Linux Only)"
+            A[6]="Q. Return to the Previous (Software Installation)"
+            ;;
+        3_2)
+            A[0]="(Home)< 3.< 2."
+            A[1]="3-2. Installation (Database)"
+            A[2]="1. installing Oracle                               +"
+            A[3]="2. installing Mysql"
+            A[4]="3. installing MongoDB"
+            A[5]="Q. Return to the Previous (Software Installation)"
+            ;;
+        3_2_1)
+            A[0]="(Home)< 3.< 2.< 1."
+            A[1]="3-2-1. Installing Oracle"
+            A[2]="1. Oracle Requirement"
+            A[3]="2. Oracle Installer"
+            A[4]="3. Oracle Patch Set Update"
+            A[5]="4. Database Creation (X)"
+            A[6]="---------- ( When the DB is Running.) ------------"
+            A[7]="5. Archive Check"
+            A[8]="6. Register ArchCheck in Crontab"
+            A[9]="Q. Return to the Previous (Installation Database)"
+            ;;
+        3_3)
+            A[0]="(Home)< 3.< 3."
+            A[1]="3-3. Installation (Aplication)"
+            A[2]="1. installing TSM                                  +"
+            A[3]="2. installing EMCP                                 +"
+            A[4]="3. installing HACMP (AIX Only)"
+            A[5]="4. Installing storcli (Linux Only)"
+            A[6]="Q. Return to the Previous (Software Installation)"
+            ;;
+        3_3_1)
+            A[0]="(Home)< 3.< 3. <1."
+            A[1]="3-3-1. Instlling TSM"
+            A[2]="1. Installing TSM Client"
+            A[3]="2. Registering Node"
+            A[4]="3. Installing Atape for SAN Backup"
+            A[5]="4. Installing Client for SAN Backup"
+            A[6]="5. Configuring SAN Backup"
+            A[7]="6. Schedule Management"
+            A[8]="Q. Return to the Previous (Installing TSM)"
+            ;;
+        3_3_2)
+            A[0]="(Home)< 3.< 3. <2."
+            A[1]="3-3-2. Instlling EMCP"
+            A[2]="1. Installing ODM"
+            A[3]="2. Installing PowerPath"
+            A[4]="3. Register PowerPath Key"
+            A[5]="4. Installing Uemcli"
+            A[6]="Q. Return to the Previous (Installation Database)"
+            ;;
+        4)
+            A[0]="(Home)< 4."
+            A[1]="4. System Management"
+            A[2]="1. Check System Dump Size (AIX Only)"
+            A[3]="2. Increasing paging space (AIX Only)"
+            A[4]="3. Installing & configuring Rundeck"
+            A[5]="4. perfMonitor Setup (After startup DBMS)"
+            A[6]="5. backup OS Environment (for AIX)"
+            A[7]="Q. Return to the Previous (Main Menu)"
+            ;;
+        *)
+            echo "You have chosen the wrong number."
+            print -n  "Press [Enter] key to continue..."; read CHC
+            return
+            ;;
+    esac
+
+    fn_printMenu ${A[@]}
+
+    print -n "\n>> Choice [ 1 ] ? "; read CHC
+    case $CHC in
+        q|Q|p|P)
+            CHC=255;;
+        "")
+            CHC=1;;
+    esac
+    RET=$(echo $CHC |grep -qe "^[-\?[0-9]*$" && echo $CHC || echo 244)
+
+    return $RET
+}

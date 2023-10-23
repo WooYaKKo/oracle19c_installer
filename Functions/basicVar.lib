@@ -1,0 +1,38 @@
+#!/bin/sh
+
+MyDir=$(cd $(dirname $0); pwd)
+[ $(echo $MyDir|grep -wc Functions) -eq 1 ] && _FuncDir=${MyDir}
+
+_BaseDir=$(cd ${_FuncDir}/../../; pwd)
+_SrcDir=${_BaseDir}/AutoScript/Script
+_SwDir=${_BaseDir}/SoftWare
+_InstDir=/instimage
+
+_MenuLog=/tmp/Automation/AutomationMenu.log
+_LogTime=$(date +%Y%m%d.%H%M)
+
+# Temp File for sed modifying Only AIX
+_sedTemp=/tmp/sedTemp
+
+# Variables for Secruity File
+_etcHosts=/etc/hosts
+_etcInetd=/etc/inetd.conf
+_etcGroup=/etc/group
+_etcProfile=/etc/profile
+_etcInittab=/etc/inittab
+_etcPasswd=/etc/passwd
+_etcRcTcpip=/etc/rc.tcpip
+_etcFtpusers=/etc/ftpusers
+
+_secUser=/etc/security/user
+_secPasswd=/etc/security/passwd
+_secLimits=/etc/security/limits
+_secLoginCfg=/etc/security/login.cfg
+
+_rootProfile=/.profile
+[ $(uname -s) = "Linux" ] &&
+    _rootProfile=/.bash_profile
+
+f_datetime () {
+    date +'%Y-%m-%d(%a) %H:%M:%S'
+}

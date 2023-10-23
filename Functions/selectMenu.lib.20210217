@@ -1,0 +1,276 @@
+#!/bin/sh
+
+# This Script is to select Menu 
+#                written by Hooni in 2020.06.08
+
+f_menu () {
+    clear
+    case $1 in
+        0)
+            echo "#####################################################
+                #
+                #                     Main Menu
+                #                    ===========
+                #
+                #
+                #  1. Initial Configuration
+                #
+                #  2. System Configration
+                #
+                #  3. Software Installation
+                #
+                #  4. System Management
+                #
+                #
+                #  Q. Quit
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;;
+        1)
+            echo "#####################################################
+                # <- Prev.) Main Menu
+                #
+                #             1. Initial Configuration
+                #            ==========================
+                #
+                #
+                #  1. AIX Basic Environment
+                #
+                #  2. AIX Basic Security Setting
+                #
+                #  3. Installing & Configuring a TCPwrapper
+                #
+                #  4. Configuring Setup.sh (/sbin/setup.sh)
+                #
+                #  0. All of OS Basic Setting ( 1 - 3 )
+                #
+                #
+                #  Q. Return to the Previous (Main Menu)
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;;
+        2)
+            echo "#####################################################
+                # <- Prev.) Main Menu
+                #
+                #             2. System Configuration
+                #            =========================
+                #
+                #
+                #  1. AIX Security vulnerability Setting
+                #
+                #  2. Creating Monitoring Shell
+                #
+                #  3. Registering Crontab
+                #
+                #
+                #
+                #  Q. Return to the Previous (Main Menu)
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;;
+        2_2)
+            echo "#####################################################
+                #
+                #          2-2. Creating Monitoring Shell
+                #         ================================
+                #
+                #
+                #  1. monitor.sh Creation
+                #
+                #  2. nmon.sh Creation
+                #
+                #  3. installing EMS
+                #
+                #  4. errpt_monitor.sh Creation (AIX Only)
+                #
+                #  0. All Setting
+                #
+                #
+                #  Q. Return to the Previous (System Configration)
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;; 
+        3)
+            echo "#####################################################
+                # <- Prev.) Main Menu
+                #
+                #             3. Software Installation
+                #            ==========================
+                #
+                #
+                #  1. Language
+                #     ( C++, Python, Git, filebeat )
+                #
+                #  2. Database
+                #     ( Oracle, Mysql, MongoDB )
+                #
+                #  3. Application
+                #     ( TSM, Powerpath, HACMP, storcli )
+                #
+                #
+                #  Q. Return to the Previous (Main Menu)
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;;
+        3_1)
+            echo "#####################################################
+                #
+                #             3-1. Installation (Language)
+                #            ==============================
+                #
+                #
+                #  1. C++ 13.1.3 (AIX Only)
+                #
+                #  2. Python 3.7
+                #
+                #  3. Git 2.24 (AIX)
+                #
+                #  4. filebeat 7.5 (Linux Only)
+                #
+                *
+                #  Q. Return to the Previous (Software Installation)
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;;
+        3_2)
+            echo "#####################################################
+                #
+                #             3-2. Installation (Database)
+                #            ==============================
+                #
+                #  1. installing Oracle
+                #
+                #  2. installing Mysql
+                #
+                #  3. installing MongoDB
+                #
+                #
+                #  Q. Return to the Previous (Software Installation)
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;;
+        3_3)
+            echo "#####################################################
+                #
+                #             3-3. Installation (Aplication)
+                #            ================================
+                #
+                #  1. installing TSM
+                #
+                #  2. installing EMCP
+                #
+                #  3. installing HACMP (AIX Only)
+                #
+                #  4. Installing storcli (Linux Only)
+                #
+                #
+                #  Q. Return to the Previous (Software Installation)
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;;
+        3_2_1)
+            echo "#####################################################
+                #
+                #              3-2-1. Installing Oracle
+                #             ========================
+                #
+                #
+                #  1. Oracle Requirement
+                #
+                #  2. Oracle Installer
+                #
+                #  3. Oracle Patch Set Update
+                #
+                #  4. Database Creation(X)
+                #
+                #  5. Archive Check
+                #
+                #
+                #  Q. Return to the Previous (Installation Database)
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;;
+        3_3_1)
+            echo "#####################################################
+                # 
+                #               3-3-1. Instlling TSM
+                #              ====================
+                #
+                #
+                #  1. Installing TSM Client
+                #
+                #  2. Registering Node
+                #
+                #  3. Installing Atape for SAN Backup
+                #
+                #  4. Installing Client for SAN Backup
+                #
+                #  5. Configuring SAN Backup
+                #
+                #  6. Schedule Management
+                #
+                #
+                #  Q. Return to the Previous (Installing TSM)
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;;
+        3_3_2)
+            echo "#####################################################
+                #
+                #                 3-3-2. Instlling EMCP
+                #                ====================
+                #
+                #
+                #  1. Installing ODM
+                #
+                #  2. Installing PowerPath
+                #
+                #  3. Register PowerPath Key
+                #
+                #
+                #  Q. Return to the Previous (Installation Database)
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;;
+        4)
+            echo "#####################################################
+                # <- Prev. Main Menu
+                #
+                #                4. System Management
+                #               ======================
+                #
+                #
+                #  1. Check System Dump Size (AIX Only)
+                #
+                #  2. Increasing paging space (AIX Only)
+                #
+                #  3. Installing & configuring Rundeck
+                #
+                #  4. perfMonitor Setup (After startup DBMS)
+                #
+                #  5. backup OS Environment (for AIX)
+                #
+                #
+                #  Q. Return to the Previous (Main Menu)
+                #
+                #####################################################" | sed 's/^ *//g'
+                ;;
+        *)
+            echo "You have chosen the wrong number."
+            print -n  "Press [Enter] key to continue..."; read ent
+            return
+            ;;
+    esac
+
+    print -n "Choice ? "; read ent
+    case $ent in
+        q|Q|p|P)
+            ent=255;;
+        "")
+            ent=1;;
+    esac
+    ret=$(echo $ent|grep -qe "^[-\?[0-9]*$" && echo $ent || echo 244)
+
+    return $ret
+}

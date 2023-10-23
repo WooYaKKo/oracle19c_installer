@@ -1,0 +1,99 @@
+#!/bin/ksh
+
+# This Script is Library of AIX System Command Functions
+#                written by Hooni in 2020.06.04
+
+
+######################################
+# Function for Createing User & Group
+
+f_mkGroup () {
+# $1 = GroupName
+# $2 = GID
+
+    fn_usage () {
+        "Usage :\n f_mkGroup GroupName GID"
+    }
+    [ $1 ] || { fn_usage; return
+        }
+    [ $1 == "-h" ] && { fn_usage; return
+        }
+
+    [ $(lsgroup $1|wc -l) -eq 0 ] && {
+        mkgroup -A id=$2 $1
+        consoleLog " * [ $1 ] Group was successfully created.\n"
+    } || consoleLog " [ $1 ] Group already exists. [OK]"
+}
+
+f_mkUser () {
+# $1 = "User:UID:Pass[:pgrp]"
+
+    fn_usage () {
+        echo "Usage:\n f_mkUser \"User:UID:Pass[:pgrp] [User:UID:Pass[:pgrp]...]\""
+    }
+    [ $1 ] || { fn_usage; return 
+        }
+    [ $1 == "-h" ] && { fn_usage; return
+        }
+
+    for List in $1; do
+        set -A arrayName
+        for i in 1 2 3 4; do
+            arrayName[i]=$(echo ${List}|cut -d: -f${i})
+        done
+        [ ${arrayName[4]} ] && pGroup=${arrayName[4]} || pGroup="IUSER"
+
+        [ $(lsuser ${arrayName[1]}|wc -l) -eq 0 ] && {
+            mkuser id=${arrayName[2]} pgrp=${pGroup} ${arrayName[1]}
+            echo "${arrayName[1]}:${arrayName[3]}"|chpasswd -c
+            consoleLog " * [ ${arrayName[1]} ] User was successfully created.\n"
+        } || consoleLog " [ ${arrayName[1]} ] User already exists. [OK]"
+    done
+}
+
+#############################
+# Adding Host in /etc/hosts
+
+f_addHost () {
+# $1 IP
+# $2 HOST
+
+    if [ $(grep '^'$1 ${_etcHosts}|wc -l) -eq 0 ]; then
+        echo "$*" >> ${_etcHosts} &&
+        consoleLog " * [ $* ] was successfully added."
+    else
+        c=0;for list in $2; do
+            if [ $(grep '^'$1 ${_etcHosts}| grep -c $list) -eq 0 ]; then
+                cp -rp ${_etcHosts} ${_etcHosts}.1
+                sed 's/^'$1'/# '$1'/' ${_etcHosts}.1 > ${_etcHosts}
+                consoleLog " * [ $1 ] already exists so the host was commented and modified."
+                c=1
+                echo "$*" >> ${_etcHosts}
+                break
+            fi
+        done
+        [ $c -eq 0 ] && consoleLog " [ $1 ] Host already exists. [OK]"
+    fi
+
+}
+
+##############################
+# Function for FS Resize
+
+f_fsResize () {
+# $1 = FS:size(GB)
+
+    for List in $1; do
+        set -A arrayName
+        for i in 1 2; do
+            arrayName[i]=$(echo ${List}|cut -d: -f${i})
+        done
+
+        if [ $(df -k|grep -w "${arrayName[1]}"|grep -v dump|awk '{print $2}') -lt $(($(echo ${arrayName[2]}|tr -d G)*1024*1024)) ]; then
+            chfs -a size=$(echo ${arrayName[2]}) ${arrayName[1]} &&
+            consoleLog " * [ ${arrayName[1]} ] FS size was successfully changed to ${arrayName[2]}.\n" 
+        else
+            consoleLog " [ ${arrayName[1]} ] FS size is already over \"${arrayName[2]}\". [OK]"
+        fi
+    done
+}
